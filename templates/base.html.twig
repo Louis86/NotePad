@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %} -NotePAD{% endblock %}</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {% block stylesheets %}
+        <link rel="stylesheet" href="{{ asset('../../build/css/app.css') }}">
+    {% endblock %}
+</head>
+<body>
+<div class="container">
+
+
+    <div class=col-md-8 role=main>
+        <div class=bs-docs-section>
+            <h1 class=page-header>{% block form_title %}{% endblock %}</h1>
+        </div>
+        {% block body %}{% endblock %}
+        {% block javascripts %}
+            <link rel="stylesheet" href="{{ asset('../../build/js/app.js') }}">
+        {% endblock %}
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+{% block title %}Liste catégorie{% endblock %}
+{% block form_title %}Liste des catégories{% endblock %}
+{% block body %}<br>
+
+    <div class="row">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Id</th><th>Nom</th><th>Editer</th><th>Supprimer</th>
+            <tr>
+            </thead>
+            <tbody>
+            {% for cat in cat %}
+                <tr>
+                    <td>{{ cat.Id  }}</td>
+                    <td>{{ cat.Libelle  }}</td>
+                    <td><a href="{{ path('edit_cat', {'id':cat.id }) }}">Modifier</a></td>
+                    <td><a href="{{ path('del_cat', {'id':cat.id }) }}">Supprimer</a></td>
+                </tr>
+            {% else %}
+                <h3>Pas de catégorie ajoutée!</h3>
+            {% endfor %}
+            </tbody>
+
+        </table>
+        <p>
+            <a type="button" class="btn btn-default btn-sm" href="{{ path('list_note') }}">Liste des notes</a>
+            <a type="button" class="btn btn-primary btn-sm" href="{{ path('ajoutCat') }}">Ajouter une categorie</a>
+        </p>
+
+    </div>
+    </div>
+{% endblock %}
