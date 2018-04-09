@@ -18,8 +18,8 @@ class CategorieRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Categorie::class);
     }
-
-    /*
+ /**
+    
     public function findBySomething($value)
     {
         return $this->createQueryBuilder('c')
@@ -29,6 +29,6 @@ class CategorieRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
         ;
-    }
-    */
+    }   */
+    
 }
