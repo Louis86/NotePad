@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\NoteRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
@@ -44,6 +45,93 @@ class NoteApiController extends Controller
 
 
 
+    /**
+     * @Route("/api/ajout/note")
+     */
+    public function apiAjoutNote(Request $request)
+    {
+
+        $contenu = $request->getContent();
+
+        $note_data = json_decode($contenu, true);
+
+        $note= new Note();
+
+        $note ->setTitle($note_data['titre']);
+
+        $note -> setContent($note_data ['contenu']);
+
+        $note -> setDate($note_data ['date']);
+
+        $em = $this->getDoctrine()->getManager();
+
+        $em->persist($note);
+
+        $em->flush();
+
+        return new JsonResponse("sucess note Add");
+
+    }
+
+
+    /**
+     * @Route("/api/supprime/note/{note}")
+     */
+    public function apiSupprimeNoteAction(Note $note)
+    {
+
+        $em = $this->getDoctrine()->getManager()->findByID;
+
+        $em->remove($note);
+
+        $em->flush();
+
+        return new JsonResponse(['sucess' => true]);
+
+
+    }
+
+
+
+    /**
+     * @Route("/api/edit/note/{id}")
+     */
+
+    public function apiEditNoteAction($id, Request $requete){
+
+        $note = new Note();
+
+        $contenu = $requete->getContent();
+
+        $donneeNote = Json_decode($contenu,true);
+
+
+        $em = $this->getDoctrine()->getManager();
+
+        $not = $this->getDoctrine()->getRepository(Note ::class)->findOneById($id);
+
+        if(!$not){
+
+
+
+        }
+        elseif(!empty($donneeNote ['titre'])){
+
+            $note->setTitle($donneeNote['titre']);
+
+
+            $note -> setContent($donneeNote['contenu']);
+
+            $note -> setDate($donneeNote['date']);
+
+            $em->persist($note);
+
+            $em->flush();
+
+            return new JsonResponse(['sucess' => true]);
+        }
+
+    }
 
 
 

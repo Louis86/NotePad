@@ -73,7 +73,7 @@ class CategorieApiController extends Controller
     public function apiSupprimeCategorieAction(Categorie $categorie)
     {
        
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->getDoctrine()->getManager()->findByID;
         
         $em->remove($categorie);
         
@@ -86,7 +86,41 @@ class CategorieApiController extends Controller
     
     
     
-    
-    
+    /**
+     * @Route("/api/edit/categorie/{id}")
+     */
    
+     public function apiEditCategorieAction($id, Request $requete){
+         
+         $cat = new Categorie();
+
+         $contenu = $requete->getContent();
+
+         $donneeCategorie = Json_decode($contenu,true);
+
+
+         $em = $this->getDoctrine()->getManager();
+
+         $cat = $this->getDoctrine()->getRepository(Categorie ::class)->findOneById($id);
+
+         if(!$cat){
+
+
+
+         }
+         elseif(!empty($donneeCategorie ['libelle'])){
+
+             $cat->setLibelle($donneeCategorie['libelle']);
+
+             $em->persist($cat);
+
+             $em->flush();
+
+             return new JsonResponse(['sucess' => true]);
+         }
+
+
+
+
+     }
 }
