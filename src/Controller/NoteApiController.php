@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Categorie;
 use App\Repository\NoteRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -23,118 +24,168 @@ use App\Entity\Note;
 
 class NoteApiController extends Controller
 {
+
     /**
      * @Route("/api/liste/note")
      */
-    public function allNoteAction()
+    public function apiListeNoteAction()
     {
-        $rs = new Response();
+        $rps = new Response();
         $encoders = array(new XmlEncoder(),new JsonEncode());
         $normalizers = array(new ObjectNormalizer());
         $serializer = new Serializer($normalizers, $encoders);
         $repository = $this->getDoctrine() ->getRepository(Note::class);
-        $nots = $repository->findAll();
-        
-        $jsonserial = $serializer->serialize($nots, 'json');
-        $rs->setContent($jsonserial);
-        return $rs;
-        
+        $note = $repository->findAll();
+
+        $jsonserial = $serializer->serialize($note, 'json');
+        $rps->setContent($jsonserial);
+        return $rps;
+
     }
 
 
 
 
+    /**
+     * @Route("/api/supprimer/note/{id}")
+     */
+    public function apiSupprimerNoteAction($id){
+
+        $em = $this->getDoctrine()->getManager();
+        $nt= $em->getRepository(Note::class)->find($id);
+
+        if($nt) {
+
+            $em->remove($nt);
+            $em->flush();
+            $response = new JsonResponse( array(
+                'status'   => 'DELETED',
+                'message'  => 'Le note est supprimé'
+            ));
+
+            $response->headers->set('Access-Control-Allow-Origin', '*');
+            return $response;
+        }
+        else {
+            return new JsonResponse(
+                array(
+                    'status' => 'NOT FOUND',
+                    'message' => 'This note does not exist'
+                )
+            );
+        }
+    }
 
     /**
      * @Route("/api/ajout/note")
      */
-    public function apiAjoutNote(Request $request)
+    public function PostNotesAction(Request $request)
     {
-
-        $contenu = $request->getContent();
-
-        $note_data = json_decode($contenu, true);
-
-        $note= new Note();
-
-        $note ->setTitle($note_data['titre']);
-
-        $note -> setContent($note_data ['contenu']);
-
-        $note -> setDate($note_data ['date']);
-
+        $note = new Note();
         $em = $this->getDoctrine()->getManager();
-
+        $body = $request -> getContent();
+        if(empty($body)){
+            return new JsonResponse("note vide");
+        }
+        $data = json_decode($body, true);
+        if(!$data){
+            return new JsonResponse("json code empty");
+        }
+        if(empty($data['title'])){
+            return new JsonResponse("titre est vide");
+        }
+        if(empty($data['content'])){
+            return new JsonResponse("contenu est vide");
+        }
+        if(empty($data['categorie'])){
+            return new JsonResponse("categorie est vide");
+        }
+        $note->setTitle($data['title']);
+        $note->setDate(new \DateTime('NOW'));
+        $note->setContent($data['content']);
+        $categories = $em->getRepository(Categorie::class)->findOneByLibelle($data['categorie']);
+        if(!$categories){
+            return new JsonResponse("categorie n'existe pas");
+        }
+        $note->setCategorie($categories);
         $em->persist($note);
-
         $em->flush();
-
-        return new JsonResponse("sucess note Add");
-
+        return new JsonResponse("note ajouté");
     }
 
-
-    /**
-     * @Route("/api/supprime/note/{note}")
-     */
-    public function apiSupprimeNoteAction(Note $note)
-    {
-
-        $em = $this->getDoctrine()->getManager()->findByID;
-
-        $em->remove($note);
-
-        $em->flush();
-
-        return new JsonResponse(['sucess' => true]);
-
-
-    }
 
 
 
     /**
      * @Route("/api/edit/note/{id}")
      */
+    public function apiEditCategorieAction(Request $requete ,$id){
 
-    public function apiEditNoteAction($id, Request $requete){
 
-        $note = new Note();
+        $encoders = array(new XmlEncoder(),new JsonEncode());
+        $normalizers = array(new ObjectNormalizer());
+        $serializer = new Serializer($normalizers, $encoders);
+
 
         $contenu = $requete->getContent();
 
-        $donneeNote = Json_decode($contenu,true);
+        if(empty($contenu)){
 
-
-        $em = $this->getDoctrine()->getManager();
-
-        $not = $this->getDoctrine()->getRepository(Note ::class)->findOneById($id);
-
-        if(!$not){
-
+            return new JsonResponse(
+                array(
+                    'status' => 'VIDE',
+                    'message' => 'le corps d
+                    e cette requete est vide')
+            );
 
 
         }
-        elseif(!empty($donneeNote ['titre'])){
 
-            $note->setTitle($donneeNote['titre']);
+        $eme = $this->getDoctrine()->getManager();
+        $not = $eme->getRepository(Note::class)->find($id);
 
 
-            $note -> setContent($donneeNote['contenu']);
 
-            $note -> setDate($donneeNote['date']);
+        if($not){
+            $note_requete = json_decode($contenu, true);
 
-            $em->persist($note);
+            $not->setTitle($note_requete['title']);
+            $not->setDate(new \DateTime('NOW'));
+            $not->setContent($note_requete['content']);
+            $categories = $eme->getRepository(Categorie::class)->findOneByLibelle($note_requete['categorie']);
+            $not->setCategorie($categories);
 
-            $em->flush();
 
-            return new JsonResponse(['sucess' => true]);
+            $eme->persist($not);
+            $eme->flush();
+            $response = new JsonResponse(
+
+                array(
+                    'status' => 'UPDATE',
+                    'message' => 'la note est mise à jour.'
+                )
+            );
+
+            $response->headers->set('Content-Type', 'application/json');
+            $response->headers->set('Access-Control-Allow-Origin', '*');
+            $response->setStatusCode(Response::HTTP_OK);
+
+            return $response;
+
+
+        }
+
+        else {
+            return new JsonResponse(
+                array(
+                    'status' => 'NOT FOUND',
+                    'message' => 'le libelle nexiste pas'
+                )
+            );
         }
 
     }
 
 
-
-
-
 }
+
